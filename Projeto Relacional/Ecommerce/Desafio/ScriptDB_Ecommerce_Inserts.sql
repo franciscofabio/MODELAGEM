@@ -70,9 +70,8 @@ insert into supplier (idSupplegalEntity, activate)
 insert into seller (idSlegalEntity, activate, classification)
 		values(2,True, 'Ouro'),
 			  (6,False, 'Prata'),
-              (7,True, 'Ouro');
-insert into seller (idSlegalEntity) 
-		values(4); -- Testando inserção de valores default
+              (7,True, 'Ouro'),
+			  (4, default, default); -- Testando inserção de valores default
 
 insert into productSupplier (idPsSupplier, idPsProduct, quantity)
 		values(2,1,20),
@@ -227,7 +226,8 @@ insert into orders_paid_by_clients (idOPCOrders, idOPCClient, idOPCtypePayment)
               (8,7,2),
               (9,1,1),
               (10,7,6);
-        
+
+-- Recuperações simples com SELECT Statement        
 select * from typePayment;
 select * from clients; -- 7
 select * from product;        
@@ -243,7 +243,82 @@ select * from storageLocation order by idLstorage;
 select * from delivery;	
 select * from orders_delivered;
 select * from orders_paid_by_clients order by idOPCClient;
-        
+
+-- Usando funções de agregação COUNT, AVG, SUM, MAX E MIN
+-- Usando o ROUND() para delimitar 2 casas decimais para a media.
+select count(*) as Total from clients; 
+select max(valor) as MAIOR_VALOR from product;
+select min(valor) as MENOR_VALOR from product;
+select round(avg(valor),2) as MEDIA_VLR_PRODUTO from product;
+
+-- Definindo Ordenação de dados com ORDER BY
+select * from clients c, orders o where c.idClient = idOrderClient order by idClient;
+
+select concat(fname,' ',Lname) as Client_, idOrder as Order_, orderStatus as Status_ 
+	from clients c, orders o 
+    where c.idClient = idOrderClient;
+
+ select count(*) from clients c, orders o 
+			where c.idClient = idOrderClient;
               
-              
-              
+select * from clients left outer join orders ON idClient = idOrderClient;
+
+select * from clients left outer join orders ON idClient = idOrderClient;
+
+select * from clients inner join orders ON idClient = idOrderClient
+					inner join productOrder ON idPOorder = idOrder;
+                    
+-- Recuperar pedidos com os produto associado
+select * from clients c 
+			inner join orders o ON c.idClient = o.idOrderClient
+			inner join productOrder p ON p.idPOorder = o.idOrder
+		group by idClient;
+-- Mais organizado
+select o.idOrder as PEDIDO, o.orderDescription as DESCRIÇÃO,
+			concat(c.fname,' ',c.Lname) as CLIENTE, c.CPF, c.address as ENDEREÇO,
+            c.birth_date as DATA_NASCIMENTO, p.idPOproduct as ID_PRODUTO, 
+            p.poQuantity as QTD, p.poStatus as STATUS_ITEM,
+            o.sendValue as FRETE, o.orderValue as VALOR_PEDIDO
+			from clients c 
+			inner join orders o ON c.idClient = o.idOrderClient
+			inner join productOrder p ON p.idPOorder = o.idOrder;
+            
+-- Recuperar produtos com dados do clientes e com os itens do pedido, descrição produto,
+-- qtd e valores dos itens e do tatal do pedido e frete com alias em portugues.
+select o.idOrder as PEDIDO, o.orderDescription as DESCRIÇÃO,
+			concat(c.fname,' ',c.Lname) as CLIENTE, p.idPOproduct as COD_PRODUTO, 
+            pd.descript as PRODUTO, pd.valor as VLR_UNIT,
+            p.poQuantity as QTD, p.poStatus as STATUS_ITEM,
+            o.sendValue as FRETE, o.orderValue as VALOR_PEDIDO
+			from clients c 
+			inner join orders o ON c.idClient = o.idOrderClient
+			inner join productOrder p ON p.idPOorder = o.idOrder
+            inner join product pd ON pd.idProduct = p.idPOproduct order by PEDIDO;
+ 
+ -- Recupera os pedidos realizados por cliente com nome completo
+ -- do cliente, status do pedido, valor de frete, valor do pedido
+ -- valor total do pedido (vlr pedido + vlr frete)
+ select c.idClient, concat(fname,' ',Lname) as Name_, o.orderStatus, o.idOrder,
+				o.sendValue, o.orderValue, 
+				round(o.orderValue + o.sendValue,2) as amount_to_pay
+				from clients c inner join orders o 
+				ON c.idClient = o.idOrderClient order by idClient;  
+                
+-- Recuperar quantos pedidos foram realizados por cliente?
+ select c.idClient, concat(fname,' ',Lname) as Name_, count(*) as Qtd_orders from clients c inner join orders o 
+				ON c.idClient = o.idOrderClient
+                group by idClient;  
+ 
+ -- Recuperar quantos pedidos foram realizados por cliente e o valor da soma dos pedidos
+ -- soma do valor com frete.
+ select c.idClient, concat(fname,' ',Lname) as Name_, count(*) as Qtd_orders,
+				round(sum(o.orderValue),2) as sum_orderValue,
+                round((sum(o.orderValue) + sum(o.sendValue)),2) as sum_orderValue_amount
+				from clients c inner join orders o 
+				ON c.idClient = o.idOrderClient
+                where c.idClient = c.idClient
+                group by idClient;  
+                    
+
+
+
