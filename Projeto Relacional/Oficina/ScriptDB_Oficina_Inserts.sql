@@ -58,11 +58,75 @@ insert into Servicos (descricao, qtd_horas)
 insert into OS (cliente_idCliente, equipe_idEquipe, statusOS, vlr_pagar, dataEntrega)
 		values(1, 4, default, 1200.00, '2022-11-30 14:30:00'),
 			  (3, 5,'Aprovada', 980.99, '2022-12-10 18:30:00'),
-              (2, 4,'Pendente', 3500.00, '2023-01-01 10:30:00'),
-              (3, 4,'Finalizada', 5200.00, '2022-11-28 08:30:00'),
-              (1, 2,'Cancelada', 620.00, '2023-01-15 09:30:00');
+              (2, 4,'Pendente', 170.00, '2023-01-01 10:30:00'),
+              (3, 4,'Finalizada', 430.00, '2022-11-28 08:30:00'),
+              (1, 2,'Cancelada', 650.00, '2023-01-15 09:30:00');
 
+insert into Mao_de_obra (servicos_idServicos, descricao, valor)
+		values(1, 'MÃO DE OBRA P/ RETIRADA E SUBSTITUIÇÃO DE KIT E FREIOS', 600.00),
+			  (2, 'MÃO DE OBRA P/ TROCA DE OLEO DO MOTOR E OUTROS', 80.00),
+              (3, 'MÃO DE OBRA P/ GERAL BASICA', 60.00),
+              (4, 'MÃO DE OBRA P/ GERAL BASICA', 60.00),
+              (5, 'REPAROS BORRACHARIA', 50.00),
+              (6, 'MÃO DE OBRA P/ REVISÃO 10KM A 40KM', 250.00),
+              (7, 'MÃO DE OBRA P/ REVISÃO 10KM A 40KM', 250.00),
+              (8, 'MÃO DE OBRA P/ REVISÃO 10KM A 40KM', 250.00),
+              (9, 'MÃO DE OBRA P/ REVISÃO 10KM A 40KM', 250.00),
+              (10, 'MÃO DE OBRA P/ REVISÃO >=40KM', default),
+              (11, 'MÃO DE OBRA P/ REVISÃO >=40KM', default),
+              (12, 'MÃO DE OBRA P/ REVISÃO >=40KM', default),
+              (13, 'MÃO DE OBRA P/ REVISÃO >=40KM', default),
+              (14, 'MÃO DE OBRA P/ REVISÃO >=40KM', default),
+              (15, 'MÃO DE OBRA P/ TROCAS EQUIPAMENTOS BORRACHARIA', 25.00);
+              
+insert into Pecas (codigo, nome, valor)
+	values('1010','FILTRO DE OLEO',80.00),
+		  ('1020','FILTRO DE COMBUSTIVEL',90.00),
+          ('1030','FILTRO DE AR',110.00),
+          ('1040','AMORTECEDOR DA SUSPENSÃO',410.00),
+          ('1050','ANEL DE PISTÃO',90.00),
+          ('1060','BRONZINA',190.00),
+          ('1070','LÂMPADA PARA VEICULO',10.99),
+          ('1080','BATERIA',390.00),
+          ('1090','CATALISADOR',180.00),
+          ('1100','FLUIDO DE FREIO',90.00);
 
+insert into Servicos_OS (OS_idOS, servicos_idServicos, qtd, valor)
+	values(1,9,1,250.00),
+		  (1,1,1,600.00),
+          (1,5,2,100.00),
+          (2,14,1,500.00),
+          (2,3,1,80.00),
+          (4,6,1,250.00),
+          (5,1,1,600.00),
+          (5,5,1,50.00);
+
+insert into Pecas_OS (OS_idOS, pecas_idPecas, qtd, valor)
+	values(1,3,1,110.00),
+		  (1,6,1,190.00),
+          (2,7,1,10.99),
+          (2,4,1,410.00),
+          (3,10,1,90.00),
+          (4,9,1,180.00);
+
+insert into Fornecedor (pessoa_idPessoa, ativo, cnpj, razao_social)
+	values(5,default,'20763803000105','Braga Leles Fornecimento LTDA'),
+		  (6,True,'19881986000184','Neymwer Acessorios & Pecas ME');
+          
+insert into Pecas_Fornecidas (fornecedor_idFornecedor, pecas_idPecas, qtd)
+	values(1,3, 60),
+          (1,4, 5),
+          (1,6, default),
+          (1,7, 100),
+          (1,8, default),
+          (1,9, 30),
+          (1,10, 20),
+          (2,1, default),
+          (2,2, 35),
+          (2,4, 11),
+          (2,5, 9),
+          (2,9, 13),
+          (2,10, 21);
 
 -- Recuperações simples com SELECT Statement        
 select * from Equipe;
@@ -82,79 +146,25 @@ select * from Pecas_Fornecidas;
 
 -- Usando funções de agregação COUNT, AVG, SUM, MAX E MIN
 -- Usando o ROUND() para delimitar 2 casas decimais para a media.
-select count(*) as Total from clients; 
-select max(valor) as MAIOR_VALOR from product;
-select min(valor) as MENOR_VALOR from product;
-select round(avg(valor),2) as MEDIA_VLR_PRODUTO from product;
+select count(*) as Total from Cliente; 
+select count(*) as Total from Cliente where credito > 0;
+select count(*) as Total from Pessoa;
+select count(*) as Total from Funcionario;
+select count(*) as Total from Equipe;
+-- Contando qtos veiculos possui placa iniciando com a letra J.
+select count(*) as Total from Veiculo where placa LIKE 'J%';
 
--- Definindo Ordenação de dados com ORDER BY
-select * from clients c, orders o where c.idClient = idOrderClient order by idClient;
+select max(vlr_pagar) as MAIOR_VALOR from OS;
+select min(vlr_pagar) as MENOR_VALOR from OS;
+select round(avg(vlr_pagar),2) as MEDIA_VLR_PAGAR from OS;
 
-select concat(fname,' ',Lname) as Client_, idOrder as Order_, orderStatus as Status_ 
-	from clients c, orders o 
-    where c.idClient = idOrderClient;
+select*from OS;
+-- Recuperar OS com os serviços, mão de obra e peças associado
+select * from Cliente c 
+			inner join OS o ON c.idCliente = o.cliente_idCliente
+			inner join Servicos_OS so ON o.idOS = so.OS_idOS
+            inner join Mao_de_obra mo ON so.servicos_idServicos = mo.servicos_idServicos
+            inner join Pecas_OS po ON o.idOS = po.OS_idOS
+		group by idCliente;
 
- select count(*) from clients c, orders o 
-			where c.idClient = idOrderClient;
-              
-select * from clients left outer join orders ON idClient = idOrderClient;
-
-select * from clients left outer join orders ON idClient = idOrderClient;
-
-select * from clients inner join orders ON idClient = idOrderClient
-					inner join productOrder ON idPOorder = idOrder;
-                    
--- Recuperar pedidos com os produto associado
-select * from clients c 
-			inner join orders o ON c.idClient = o.idOrderClient
-			inner join productOrder p ON p.idPOorder = o.idOrder
-		group by idClient;
--- Mais organizado
-select o.idOrder as PEDIDO, o.orderDescription as DESCRIÇÃO,
-			concat(c.fname,' ',c.Lname) as CLIENTE, c.CPF, c.address as ENDEREÇO,
-            c.birth_date as DATA_NASCIMENTO, p.idPOproduct as ID_PRODUTO, 
-            p.poQuantity as QTD, p.poStatus as STATUS_ITEM,
-            o.sendValue as FRETE, o.orderValue as VALOR_PEDIDO
-			from clients c 
-			inner join orders o ON c.idClient = o.idOrderClient
-			inner join productOrder p ON p.idPOorder = o.idOrder;
             
--- Recuperar produtos com dados do clientes e com os itens do pedido, descrição produto,
--- qtd e valores dos itens e do tatal do pedido e frete com alias em portugues.
-select o.idOrder as PEDIDO, o.orderDescription as DESCRIÇÃO,
-			concat(c.fname,' ',c.Lname) as CLIENTE, p.idPOproduct as COD_PRODUTO, 
-            pd.descript as PRODUTO, pd.valor as VLR_UNIT,
-            p.poQuantity as QTD, p.poStatus as STATUS_ITEM,
-            o.sendValue as FRETE, o.orderValue as VALOR_PEDIDO
-			from clients c 
-			inner join orders o ON c.idClient = o.idOrderClient
-			inner join productOrder p ON p.idPOorder = o.idOrder
-            inner join product pd ON pd.idProduct = p.idPOproduct order by PEDIDO;
- 
- -- Recupera os pedidos realizados por cliente com nome completo
- -- do cliente, status do pedido, valor de frete, valor do pedido
- -- valor total do pedido (vlr pedido + vlr frete)
- select c.idClient, concat(fname,' ',Lname) as Name_, o.orderStatus, o.idOrder,
-				o.sendValue, o.orderValue, 
-				round(o.orderValue + o.sendValue,2) as amount_to_pay
-				from clients c inner join orders o 
-				ON c.idClient = o.idOrderClient order by idClient;  
-                
--- Recuperar quantos pedidos foram realizados por cliente?
- select c.idClient, concat(fname,' ',Lname) as Name_, count(*) as Qtd_orders from clients c inner join orders o 
-				ON c.idClient = o.idOrderClient
-                group by idClient;  
- 
- -- Recuperar quantos pedidos foram realizados por cliente e o valor da soma dos pedidos
- -- soma do valor com frete.
- select c.idClient, concat(fname,' ',Lname) as Name_, count(*) as Qtd_orders,
-				round(sum(o.orderValue),2) as sum_orderValue,
-                round((sum(o.orderValue) + sum(o.sendValue)),2) as sum_orderValue_amount
-				from clients c inner join orders o 
-				ON c.idClient = o.idOrderClient
-                where c.idClient = c.idClient
-                group by idClient;  
-                    
-
-
-

@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS OS (
 CREATE TABLE IF NOT EXISTS Mao_de_obra (
   idMao_de_obra INT NOT NULL auto_increment,
   servicos_idServicos INT NOT NULL,
-  descricao VARCHAR(30) NOT NULL,
+  descricao VARCHAR(60) NOT NULL,
   valor FLOAT NOT NULL default 650.00,
   PRIMARY KEY (idMao_de_obra),
   constraint fk_mao_de_obra_servicos foreign key (servicos_idServicos) references Servicos(idServicos)
